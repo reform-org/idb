@@ -4,8 +4,8 @@ import { IDBPObjectStore, IDBPIndex, IDBPCursor } from './entry.js';
 
 const advanceMethodProps = ['continue', 'continuePrimaryKey', 'advance'];
 const methodMap: { [s: string]: Func } = {};
-const advanceResults = new WeakMap<IDBPCursor, Promise<IDBPCursor | null>>();
-const ittrProxiedCursorToOriginalProxy = new WeakMap<IDBPCursor, IDBPCursor>();
+const advanceResults = new WeakMap<IDBPCursor<any, any, any, any, any>, Promise<IDBPCursor<any, any, any, any ,any> | null>>();
+const ittrProxiedCursorToOriginalProxy = new WeakMap<IDBPCursor<any, any, any, any ,any>, IDBPCursor<any, any, any, any ,any>>();
 
 const cursorIteratorTraps: ProxyHandler<any> = {
   get(target, prop) {
@@ -15,7 +15,7 @@ const cursorIteratorTraps: ProxyHandler<any> = {
 
     if (!cachedFunc) {
       cachedFunc = methodMap[prop as string] = function (
-        this: IDBPCursor,
+        this: IDBPCursor<any, any, any, any ,any>,
         ...args: any
       ) {
         advanceResults.set(
@@ -30,19 +30,19 @@ const cursorIteratorTraps: ProxyHandler<any> = {
 };
 
 async function* iterate(
-  this: IDBPObjectStore | IDBPIndex | IDBPCursor,
+  this: IDBPObjectStore<any> | IDBPIndex<any> | IDBPCursor<any, any, any, any ,any>,
   ...args: any[]
 ): AsyncIterableIterator<any> {
   // tslint:disable-next-line:no-this-assignment
   let cursor: typeof this | null = this;
 
   if (!(cursor instanceof IDBCursor)) {
-    cursor = await (cursor as IDBPObjectStore | IDBPIndex).openCursor(...args);
+    cursor = await (cursor as IDBPObjectStore<any> | IDBPIndex<any>).openCursor(...args);
   }
 
   if (!cursor) return;
 
-  cursor = cursor as IDBPCursor;
+  cursor = cursor as IDBPCursor<any, any, any, any ,any>;
   const proxiedCursor = new Proxy(cursor, cursorIteratorTraps);
   ittrProxiedCursorToOriginalProxy.set(proxiedCursor, cursor);
   // Map this double-proxy back to the original, so other cursor methods work.

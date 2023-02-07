@@ -35,7 +35,7 @@ function getMethod(
   }
 
   const method = async function (
-    this: IDBPDatabase,
+    this: IDBPDatabase<any>,
     storeName: string,
     ...args: any[]
   ) {
@@ -43,7 +43,7 @@ function getMethod(
     const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
     let target:
       | typeof tx.store
-      | IDBPIndex<unknown, string[], string, string, 'readwrite' | 'readonly'> =
+      | IDBPIndex<any, string[], string, string, 'readwrite' | 'readonly'> =
       tx.store;
     if (useIndex) target = target.index(args.shift());
 

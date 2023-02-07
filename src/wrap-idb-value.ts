@@ -37,7 +37,7 @@ function getCursorAdvanceMethods(): Func[] {
   );
 }
 
-const cursorRequestMap: WeakMap<IDBPCursor, IDBRequest<IDBCursor>> =
+const cursorRequestMap: WeakMap<IDBPCursor<any, any, any, any ,any>, IDBRequest<IDBCursor>> =
   new WeakMap();
 const transactionDoneMap: WeakMap<IDBTransaction, Promise<void>> =
   new WeakMap();
@@ -70,7 +70,7 @@ function promisifyRequest<T>(request: IDBRequest<T>): Promise<T> {
       // (see wrapFunction).
       if (value instanceof IDBCursor) {
         cursorRequestMap.set(
-          value as unknown as IDBPCursor,
+          value as unknown as IDBPCursor<any, any, any, any ,any>,
           request as unknown as IDBRequest<IDBCursor>,
         );
       }
@@ -161,7 +161,7 @@ function wrapFunction<T extends Func>(func: T): Function {
     !('objectStoreNames' in IDBTransaction.prototype)
   ) {
     return function (
-      this: IDBPDatabase,
+      this: IDBPDatabase<any>,
       storeNames: string | string[],
       ...args: any[]
     ) {
@@ -180,7 +180,7 @@ function wrapFunction<T extends Func>(func: T): Function {
   // with real promises, so each advance methods returns a new promise for the cursor object, or
   // undefined if the end of the cursor has been reached.
   if (getCursorAdvanceMethods().includes(func)) {
-    return function (this: IDBPCursor, ...args: Parameters<T>) {
+    return function (this: IDBPCursor<any, any, any, any, any>, ...args: Parameters<T>) {
       // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
       // the original object.
       func.apply(unwrap(this), args);
@@ -214,13 +214,13 @@ function transformCachableValue(value: any): any {
  *
  * @param value The thing to enhance.
  */
-export function wrap(value: IDBDatabase): IDBPDatabase;
-export function wrap(value: IDBIndex): IDBPIndex;
-export function wrap(value: IDBObjectStore): IDBPObjectStore;
-export function wrap(value: IDBTransaction): IDBPTransaction;
+export function wrap(value: IDBDatabase): IDBPDatabase<any>;
+export function wrap(value: IDBIndex): IDBPIndex<any>;
+export function wrap(value: IDBObjectStore): IDBPObjectStore<any>;
+export function wrap(value: IDBTransaction): IDBPTransaction<any>;
 export function wrap(
   value: IDBOpenDBRequest,
-): Promise<IDBPDatabase | undefined>;
+): Promise<IDBPDatabase<any> | undefined>;
 export function wrap<T>(value: IDBRequest<T>): Promise<T>;
 export function wrap(value: any): any {
   // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
@@ -252,12 +252,12 @@ export function wrap(value: any): any {
 interface Unwrap {
   (value: IDBPCursorWithValue<any, any, any, any, any>): IDBCursorWithValue;
   (value: IDBPCursor<any, any, any, any, any>): IDBCursor;
-  (value: IDBPDatabase): IDBDatabase;
+  (value: IDBPDatabase<any>): IDBDatabase;
   (value: IDBPIndex<any, any, any, any, any>): IDBIndex;
   (value: IDBPObjectStore<any, any, any, any>): IDBObjectStore;
   (value: IDBPTransaction<any, any, any>): IDBTransaction;
-  <T extends any>(value: Promise<IDBPDatabase<T>>): IDBOpenDBRequest;
-  (value: Promise<IDBPDatabase>): IDBOpenDBRequest;
+  <T extends any>(value: Promise<IDBPDatabase<any>>): IDBOpenDBRequest;
+  (value: Promise<IDBPDatabase<any>>): IDBOpenDBRequest;
   <T>(value: Promise<T>): IDBRequest<T>;
 }
 export const unwrap: Unwrap = (value: any): any =>
