@@ -636,16 +636,14 @@ export interface IDBPObjectStore<
    *
    * Rejects if an item of a given key already exists in the store.
    */
-  add: Mode extends 'readonly'
-    ? undefined
-    : (
+  add: (
         value: StoreValue<DBTypes, StoreName>,
         key?: StoreKey<DBTypes, StoreName> | IDBKeyRange,
       ) => Promise<StoreKey<DBTypes, StoreName>>;
   /**
    * Deletes all records in store.
    */
-  clear: Mode extends 'readonly' ? undefined : () => Promise<void>;
+  clear: () => Promise<void>;
   /**
    * Retrieves the number of records matching the given query.
    */
@@ -657,19 +655,15 @@ export interface IDBPObjectStore<
    *
    * Throws an "InvalidStateError" DOMException if not called within an upgrade transaction.
    */
-  createIndex: Mode extends 'versionchange'
-    ? <IndexName extends IndexNames<DBTypes, StoreName>>(
+  createIndex: <IndexName extends IndexNames<DBTypes, StoreName>>(
         name: IndexName,
         keyPath: string | string[],
         options?: IDBIndexParameters,
-      ) => IDBPIndex<DBTypes, TxStores, StoreName, IndexName, Mode>
-    : undefined;
+      ) => IDBPIndex<DBTypes, TxStores, StoreName, IndexName, Mode>;
   /**
    * Deletes records in store matching the given query.
    */
-  delete: Mode extends 'readonly'
-    ? undefined
-    : (key: StoreKey<DBTypes, StoreName> | IDBKeyRange) => Promise<void>;
+  delete: (key: StoreKey<DBTypes, StoreName> | IDBKeyRange) => Promise<void>;
   /**
    * Retrieves the value of the first record matching the query.
    *
@@ -747,9 +741,7 @@ export interface IDBPObjectStore<
    *
    * Replaces any item with the same key.
    */
-  put: Mode extends 'readonly'
-    ? undefined
-    : (
+  put: (
         value: StoreValue<DBTypes, StoreName>,
         key?: StoreKey<DBTypes, StoreName> | IDBKeyRange,
       ) => Promise<StoreKey<DBTypes, StoreName>>;
@@ -988,13 +980,11 @@ export interface IDBPCursor<
   /**
    * Delete the current record.
    */
-  delete: Mode extends 'readonly' ? undefined : () => Promise<void>;
+  delete: () => Promise<void>;
   /**
    * Updated the current record.
    */
-  update: Mode extends 'readonly'
-    ? undefined
-    : (
+  update: (
         value: StoreValue<DBTypes, StoreName>,
       ) => Promise<StoreKey<DBTypes, StoreName>>;
   /**
