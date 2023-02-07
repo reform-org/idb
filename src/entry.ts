@@ -148,6 +148,7 @@ export function deleteDB(
 export { unwrap, wrap } from './wrap-idb-value.js';
 
 // === The rest of this file is type defs ===
+type KeyOf<T extends object> = Extract<keyof T, string>;
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export interface DBSchema {
@@ -161,7 +162,7 @@ interface IndexKeys {
 interface DBSchemaValue {
   key: IDBValidKey;
   value: any;
-  indexes?: IndexKeys;
+  indexes: IndexKeys;
 }
 
 /**
@@ -169,7 +170,7 @@ interface DBSchemaValue {
  *
  * @template DBTypes DB schema type, or unknown if the DB isn't typed.
  */
-export type StoreNames<DBTypes extends DBSchema> = keyof DBTypes;
+export type StoreNames<DBTypes extends DBSchema> = KeyOf<DBTypes>;
 
 /**
  * Extract database value types from the DB schema type.
@@ -201,8 +202,8 @@ export type StoreKey<
  */
 export type IndexNames<
   DBTypes extends DBSchema,
-  StoreName extends keyof DBTypes,
-> = keyof DBTypes[StoreName]['indexes'];
+  StoreName extends KeyOf<DBTypes>,
+> = KeyOf<DBTypes[StoreName]['indexes']>;
 
 /**
  * Extract the types of indexes in certain object stores from the DB schema type.
