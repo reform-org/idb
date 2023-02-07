@@ -69,36 +69,6 @@ export default async function ({ watch }) {
     },
   });
 
-  // Tests
-  if (!process.env.PRODUCTION) {
-    builds.push({
-      plugins: [
-        simpleTS('test', { noBuild: true }),
-        resolve(),
-        commonjs(),
-        {
-          async generateBundle() {
-            this.emitFile({
-              type: 'asset',
-              source: await fsp.readFile('test/index.html'),
-              fileName: 'index.html',
-            });
-          },
-        },
-      ],
-      input: [
-        'test/index.ts',
-        'test/main.ts',
-        'test/open.ts',
-        'test/iterate.ts',
-      ],
-      output: {
-        dir: 'build/test',
-        format: 'esm',
-      },
-    });
-  }
-
   builds.push(
     ...(await globP('size-tests/*.js').then((paths) =>
       paths.map((path) => ({
