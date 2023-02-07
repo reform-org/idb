@@ -30,7 +30,7 @@
   "scripts": {
     "build": "PRODUCTION=1 rollup -c && node --experimental-modules lib/size-report.mjs",
     "dev": "rollup -c --watch",
-    "prepack": "npm run build"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
